@@ -10,6 +10,7 @@ export interface ImageData {
     id: number
     userId: number
     imageUrl: string
+    description?: string
 }
 
 /**
@@ -21,6 +22,7 @@ let images: ImageData[] = Array(20)
         id,
         userId: getRandomUser().id,
         imageUrl: faker.image.image(),
+        description: faker.lorem.words(10),
     }))
 
 let currentId = images.length
@@ -32,6 +34,7 @@ interface ImageService {
     fetchAllImages(): Promise<ImageData[]>
     addImage(imageUrl: string): Promise<ImageData>
     deleteImage(imageId: number): Promise<ImageData | null>
+    getImage(imageId: number): Promise<ImageData>
 }
 
 /**
@@ -43,16 +46,17 @@ export const imageService: ImageService = {
         return images
     },
 
-    async addImage(imageUrl: string) {
+    async addImage(imageUrl: string, description?: string) {
         await sleep(50)
         const userId = getCurrentUserId()
-        if (!userId) {
+        if (userId === undefined) {
             throw new Error('not authenticated')
         }
         const imageData: ImageData = {
             id: ++currentId,
             userId,
             imageUrl,
+            description,
         }
         images.push(imageData)
         return imageData
@@ -61,7 +65,7 @@ export const imageService: ImageService = {
     async deleteImage(imageId: number) {
         await sleep(50)
         const userId = getCurrentUserId()
-        if (!userId) {
+        if (userId === undefined) {
             throw new Error('not authenticated')
         }
         const deletedImage = images.find(image => image.id === imageId)
@@ -70,5 +74,14 @@ export const imageService: ImageService = {
         }
         images = images.filter(image => image.id !== imageId)
         return deletedImage || null
+    },
+
+    async getImage(imageId: number) {
+        await sleep(50)
+        const foundImage = images.find(image => image.id === imageId)
+        if (!foundImage) {
+            throw new Error('image not found')
+        }
+        return foundImage
     }
 }
