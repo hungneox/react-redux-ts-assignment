@@ -83,5 +83,5 @@ export const imageService: ImageService = {
             throw new Error('image not found')
         }
         return foundImage
-    }
+    },
 }
